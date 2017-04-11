@@ -1,0 +1,65 @@
+/****************************************************************/
+/* Part A - Compiler       					*/
+/* Adamos Kyriakou 934448   					*/
+/* Theocharis Psalios 952056 					*/
+/*								*/
+/* How to compile:						*/
+/* bison -d parse_934448_952056.y				*/
+/* flex parse_934448_952056.fl					*/
+/* gcc parse_934448_952056.tab.c lex.yy.c -lfl -o parse.out	*/
+/****************************************************************/
+
+%{
+
+ #include <string.h>
+ #include <stdio.h>
+ #include "parse_934448_952056.tab.h"
+
+%}
+%option yylineno
+LETTER [a-zA-Z]
+DIGIT [0-9]
+FLOAT {DIGIT}+\.{DIGIT}+
+NUM 0|[1-9]{DIGIT}*
+ID {LETTER}{LETTER}*
+WHITESPACE [ \t\n]
+%%
+[/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]      			{/* Multi-lined comment */}
+[/][*]                                   			{ yyerror("Error on comments",yytext); }
+"//"[^\n]*							{ /* One-line comment */}
+"else"								{return ELSE;}
+"if"								{return IF;}
+"int"								{return INT;}
+"float"								{return FLOAT;}
+"return"							{return RETURN;}
+"void"								{return VOID;}
+"while"								{return WHILE;}
+{ID}								{
+									char *temp = (char*) malloc (strlen(yytext)*sizeof(char));
+									strcpy(temp, yytext);
+									yylval.str = temp;
+									return ID;
+								}
+{FLOAT}								{
+									yylval.f_number = atof(yytext);
+									return FLOAT_NUM;
+								}
+{NUM}								{
+									yylval.a_number = atoi(yytext);
+									return NUM;
+								}
+">="								{return GTOE;}
+"<="								{return LTOE;}
+"=="								{return EQUAL;}
+"!="								{return NEQUAL;}
+"++"								{return PP;}
+"+="								{return PE;}
+"--"								{return MM;}
+"-="								{return ME;}
+[+_*/<>=;,()[\]{}-]						{return yytext[0];}
+{WHITESPACE}+							{/*printf("%c",yytext[0]);*/}
+.                                            			{yyerror("Unrecognized character",yytext);}
+%%
+int yywrap(){
+   return 1;
+}

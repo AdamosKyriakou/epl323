@@ -1,0 +1,53 @@
+/* A program to perform selection sort on a 10
+element array. */
+
+int x[10];
+int food(void){
+}
+int foo ( int a[], int low, float high ){
+  void i; int x; float k; int ko;
+  k = -10;
+  x = a[low];
+  i = low + 1;
+  while (i < high){ 
+   float y;
+    if (a[i] < x){
+      x = a[i];
+      k = i; 
+    }  else if (x==0){
+       int x;
+    }
+    i = i + 1;
+  }
+  {
+	int h;{int h;}
+  }
+  return k;
+}
+
+int food(int h,int g,int k,int p){
+}
+int food(int h){
+}
+int minloc (int a[], int low, float high, int g, float t,float h[]){
+  void i; int x; int k; float v[4];
+  k=8; i=17;
+x = ab[q];
+  ab[q]=3;
+  ko=ko+1;
+  i = low + 1;
+  l=0;
+  food();
+  while (i < high){ 
+   float y;
+    if (a[i] < x){
+      x = a[i];
+      k = i; 
+    }  else if (x==0){
+       int x;
+    }
+   i = a[0]/2.0;
+  }
+
+  return k;
+}
