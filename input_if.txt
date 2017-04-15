@@ -30,7 +30,7 @@ int food(int h,int g,int k,int p){
 int food(int h){
 }
 int minloc (int a[], int low, float high, int g, float t,float h[]){
-  void i; int x; int k; float v[4];
+  void i; int x; int k; float v[4]; float m;
   k=8; i=17;
 x = ab[q];
   ab[q]=3;
@@ -46,8 +46,11 @@ x = ab[q];
     }  else if (x==0){
        int x;
     }
-   i = a[0]/2.0;
+  k=3.0*2;
   }
+
+  for(k=0; ; k++)
+	;
 
   return k;
 }

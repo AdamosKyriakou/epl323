@@ -24,7 +24,7 @@
  STACK *s=NULL;
  int isCompound = 0, isNum = 0, isFloat = 0, isLeft=0; //Used to find blocks inside functions
  int isArray=0;
- int flag=1;
+ int flag=1, expType = -1, termType = -1;
  int argsList[10], argsCounter = 0;
  QUEUENODE *f = NULL, *g=NULL;
  QUEUENODE **t;
@@ -32,6 +32,7 @@
  void myError (char *errorStr);
  void pushQueue();
  void pushQueue1();
+ int containsNumber(char *string);
  QUEUENODE * insertInQueue(char* ret, char* two, int isFunction, int isArray);
 %}
 %union {
@@ -211,14 +212,14 @@ param_list: param_list ',' param					{$$= (char*) malloc ((strlen($3)+2+strlen($
 param: type_specifier ID						{
 										strcat($$," ");
 										strcat($$,$2);
-										insertInQueue($1, $2, 0, 0); // Enqueue parameter
+										insertInQueue(strtok($1," "), $2, 0, 0); // Enqueue parameter
 									}
   | type_specifier ID '[' ']'						{
 										strcat($$," ");
 										strcat($$,$2);
 										strcat($$,"[]");
 										//$$= (char*) malloc ((strlen($1)+strlen($2)+1)*sizeof(char)); strcpy($$,$1);strcat($$," ");strcat($$,$2);
-										insertInQueue($1, $2, 0, 1); // Enqueue array parameter
+										insertInQueue(strtok($1," "), $2, 0, 1); // Enqueue array parameter
 									}
   | error ID '[' ']'							{yyerrok;}
   | error type_specifier ID						{yyerrok;}
@@ -233,7 +234,7 @@ local_declarations: 							{/*empty*/}
 statement_list:  							{/*empty*/}
   | statement_list statement						{}
 ;
-statement: expression_stmt						{/*$$= (char*) malloc (strlen($1)*sizeof(char)); strcpy($$,$1);*/}
+statement: expression_stmt						{}
   | { if (isCompound != 1){ pushQueue(); printf("Push in Compound\n"); isCompound=2;  }} compound_stmt	{
 														if (isCompound == 2){
 															pop(s); printf("Pop in Compound\n"); 
@@ -241,7 +242,7 @@ statement: expression_stmt						{/*$$= (char*) malloc (strlen($1)*sizeof(char));
 														} 
 													}
   | {pushQueue(); printf("Push in If/Else\n"); isCompound=1;} selection_stmt				{pop(s); printf("Pop in If/Else\n");isCompound=0;}
-  | {pushQueue(); printf("Push in Iteration\n"); isCompound=1;}iteration_stmt				{pop(s); printf("Pop in Iteration\n");isCompound=0;}
+  | {pushQueue(); printf("Push in Iteration\n"); isCompound=1; printf("GOT IN FOR\n");}iteration_stmt				{pop(s); printf("Pop in Iteration\n");isCompound=0;}
   | return_stmt								{}
 ;
 expression_stmt: expression ';'						{/*$$= (char*) malloc (strlen($1)*sizeof(char)); strcpy($$,$1); strcat($$,";");*/}
@@ -257,7 +258,7 @@ selection_stmt: IF'('expression')' statement %prec NO_ELSE		{
   | IF'('error')'statement %prec NO_ELSE				{yyerrok;}
   | IF'('error')'statement ELSE statement				{yyerrok;}
 ;
-iteration_stmt: WHILE '(' expression ')'{isCompound=1;} statement			{	
+iteration_stmt: WHILE '(' expression ')'{isCompound=1;} statement	{	
 										//pushQueue(); printf("Push in Iteration\n");
 									}
   | WHILE '(' error ')' statement					{yyerrok;}
@@ -272,39 +273,124 @@ return_stmt: RETURN ';'							{}
   | RETURN error							{yyerrok;}
 ;
 expression: var '=' expression						{ 
-									  /*$$= (char*) malloc (strlen($1)*sizeof(char)); 
-									  strcpy($$,$1);
-									  strcat($$,"=");
-									  strcat($$,$3);*/
-									  QUEUENODE *temp = NULL;
-									  if (isArray==0){
-									  	searchStack(s,$1, &temp,0);
-									  }
-									  else{
-										char *str = (char*)malloc(strlen($1)*sizeof(char));
-										strcpy(str,$1);
-									  	searchStack(s,strtok(str,"["), &temp,1);
-										isArray=0;
-									  }
+										/*$$= (char*) malloc (strlen($1)*sizeof(char)); 
+										strcpy($$,$1);
+										strcat($$,"=");
+										strcat($$,$3);*/
+										QUEUENODE *temp = NULL;
+										char *string = (char*)malloc(strlen($3));
+										strcpy(string,$3);
+										if (isArray==0){
+									  		searchStack(s,$1, &temp,0);
+										}
+										else{
+											char *str = (char*)malloc(strlen($1)*sizeof(char));
+											strcpy(str,$1);
+									  		searchStack(s,strtok(str,"["), &temp,1);
+											isArray=0;
+										}
+										//printf("$$: %s N: %d F: %d TEMP: %p\n",$3,isNum,isFloat,temp);
+										/*If expression is a number check if the type matches var type*/
+										if (isNum == 1 && temp->symbol->type != 1){
+											errorStr = (char*)malloc(strlen("assignment of int to float ")*sizeof(char));
+											strcat(errorStr,"Assignment of int to float ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										else if (isFloat == 1 && temp->symbol->type != 2){
+											errorStr = (char*)malloc(strlen("assignment of float to int ")*sizeof(char));
+											strcat(errorStr,"Assignment of float to int ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										/*If expression does contain number then check if the type matches var*/
+										else if (strstr(string," ") == NULL && strstr(string,"-") == NULL && strstr(string,"+") == NULL && strstr(string,"*") == NULL && strstr(string,"/") == NULL){
+											//printf("HERERERERERERERERERERERERERERE: %s\n",string);					
+											if (containsNumber(string) == 1 || strstr(string, ".") != NULL){ // only one number	
+												if (strlen(string) == 1){
+													if (temp != NULL && temp->symbol->type != 1){
+														//printf("NUM123: %s temp: %d\n",string,temp->symbol->type);
+														errorStr = (char*)malloc(strlen("assignment of float to int ")*sizeof(char));
+														strcat(errorStr,"Assignment of float to int ");
+														myError(errorStr);
+														errorStr=NULL;												
+													}
+												}
+												else{
+													if (temp != NULL && temp->symbol->type != 2){
+														//printf("NUM: %s temp: %d\n",string,temp->symbol->type);
+														errorStr = (char*)malloc(strlen("assignment of int to float ")*sizeof(char));
+														strcat(errorStr,"Assignment of int to float ");
+														myError(errorStr);
+														errorStr=NULL;
+													}
+												}
+													
+											}
+											else{  // only one var
+											}
+										}								
+										expType = -1; termType = -1;
 									}
   | var '=' '-' expression						{
-									  /*$$= (char*) malloc (strlen($1)*sizeof(char)); 
-									  strcpy($$,$1);
-									  strcat($$,"=-");
-									  strcat($$,$4);*/
-									  QUEUENODE *temp = NULL;
-									  searchStack(s,$1, &temp,0);
-									  /*if (temp==NULL){
-										errorStr = (char*)malloc(strlen("variable ")*sizeof(char));
-										strcat(errorStr,"Variable ");
-										strcat(errorStr,$1);
-										strcat(errorStr," is not declared");
-										myError(errorStr);
-										errorStr=NULL;
-									  }*/
+										QUEUENODE *temp = NULL;
+										char *string = (char*)malloc(strlen($4));
+										strcpy(string,$4);
+										if (isArray==0){
+									  		searchStack(s,$1, &temp,0);
+										}
+										else{
+											char *str = (char*)malloc(strlen($1)*sizeof(char));
+											strcpy(str,$1);
+									  		searchStack(s,strtok(str,"["), &temp,1);
+											isArray=0;
+										}
+										//printf("$$: %s N: %d F: %d TEMP: %p\n",$3,isNum,isFloat,temp);
+										/*If expression is a number check if the type matches var type*/
+										if (isNum == 1 && temp->symbol->type != 1){
+											errorStr = (char*)malloc(strlen("assignment of int to float ")*sizeof(char));
+											strcat(errorStr,"Assignment of int to float ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										else if (isFloat == 1 && temp->symbol->type != 2){
+											errorStr = (char*)malloc(strlen("assignment of float to int ")*sizeof(char));
+											strcat(errorStr,"Assignment of float to int ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										/*If expression does contain number then check if the type matches var*/
+										else if (strstr(string," ") == NULL && strstr(string,"-") == NULL && strstr(string,"+") == NULL && strstr(string,"*") == NULL && strstr(string,"/") == NULL){
+											//printf("HERERERERERERERERERERERERERERE: %s\n",string);					
+											if (containsNumber(string) == 1 || strstr(string, ".") != NULL){ // only one number	
+												if (strlen(string) == 1){
+													if (temp != NULL && temp->symbol->type != 1){
+														//printf("NUM123: %s temp: %d\n",string,temp->symbol->type);
+														errorStr = (char*)malloc(strlen("assignment of float to int ")*sizeof(char));
+														strcat(errorStr,"Assignment of float to int ");
+														myError(errorStr);
+														errorStr=NULL;												
+													}
+												}
+												else{
+													if (temp != NULL && temp->symbol->type != 2){
+														//printf("NUM: %s temp: %d\n",string,temp->symbol->type);
+														errorStr = (char*)malloc(strlen("assignment of int to float ")*sizeof(char));
+														strcat(errorStr,"Assignment of int to float ");
+														myError(errorStr);
+														errorStr=NULL;
+													}
+												}
+													
+											}
+											else{  // only one var
+											}
+										}								
+										expType = -1; termType = -1;
+
 									}
   | var '=' error expression						{yyerrok;}
-  | simple_expression							{isNum = 0; isFloat=0;}
+  | simple_expression							{isNum = 0; isFloat=0; /*printf("SIMPLE: %s\n",$$);*/}
 ;
 var: ID									{
 										$$ = (char*) malloc (strlen($1)*sizeof(char));
@@ -359,21 +445,10 @@ var: ID									{
 									}
 ;
 simple_expression: additive_expression relop additive_expression	{
-										astNodePtr exp = newExprNode(ADD_EXP,yylineno);
-										exp->children[0]->type=$1; //malloc child
-										exp->children[1]->type=$3;
-										//print_node($$);
-										printf("COMPARE: %d",strcmp($1,$3));
-										printf("\n");
-										//($1->value)=($$->value);	
+										
 									}
   | additive_expression							{
-										astNodePtr exp = newExprNode(ADD_EXP,yylineno);
-										exp->children[0]->type=$1;
-										//print_node($$);
-										//printf("COMPARE: %d",strcmp($1,$3));
-										printf("\n");
-										//($1->value)=($$->value);
+									
 									}
 ;
 relop: GTOE								{/*$$ = (char*) malloc (strlen(">=")*sizeof(char)); strcpy($$, ">=");*/}
@@ -384,8 +459,9 @@ relop: GTOE								{/*$$ = (char*) malloc (strlen(">=")*sizeof(char)); strcpy($$
   | '>'									{/*$$ = (char*) malloc (strlen(">")*sizeof(char)); strcpy($$, ">");*/}
 ;
 additive_expression: additive_expression addop term			{
-										printf("ADDITIVE:%s ADDOP:%s TERM:%s\n",$1,$2,$3);
+										/*printf("ADDITIVE:%s ADDOP:%s TERM:%s\n",$1,$2,$3);
 										printf("isNum=%d, isFloat=%d\n",isNum, isFloat);
+										printf("termType=%d, expType=%d\n",termType, expType);*/
 
 										char* temp = (char*)malloc(strlen($1));
 										strcpy(temp,$1);
@@ -406,11 +482,19 @@ additive_expression: additive_expression addop term			{
 											searchStack(s, strtok(temp,"["), &g, 1);
 										if (g == NULL)
 											searchStack(s, $3, &g, 2);
-
-										//printf("isNUM:%d\n",f->symbol->type,isNum);
+/*
+									if (f!=NULL)	
+										printf("F:%p, G:%p, isNum:%d, isFloat:%d Type:%d\n",f,g,isNum,isFloat,f->symbol->type);*/
 
 										/*Check for type for var, array, function*/
-										if (f!=NULL && g!= NULL && f->symbol->type != g->symbol->type){
+										int type = -1;
+										if (isNum == 1 && isFloat == 1){
+											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
+											strcat(errorStr,"Operation between different types ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										else if (f!=NULL && g!= NULL && f->symbol->type != g->symbol->type){
 											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
 											strcat(errorStr,"Operation between different types ");
 											myError(errorStr);
@@ -418,21 +502,40 @@ additive_expression: additive_expression addop term			{
 										}
 
 										/*Check for var, array, function and integer*/
-										if ((f!=NULL && (f->symbol->type == 1) && (isNum != 1)) || (g!=NULL && (g->symbol->type == 1) && (isNum != 1))){
+										else if ((f!=NULL && (f->symbol->type == 1) && (isNum != 1)) || (g!=NULL && (g->symbol->type == 1) && (isNum != 1))){
 											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
 											strcat(errorStr,"Operation between different types ");
 											myError(errorStr);
 											errorStr=NULL;
 										}
-										if ((f!=NULL && (f->symbol->type == 2) && (isFloat != 1)) || (g!=NULL && (g->symbol->type == 2) && (isFloat != 1))){
+										else if ((f!=NULL && (f->symbol->type == 2) && (isFloat != 1)) || (g!=NULL && (g->symbol->type == 2) && (isFloat != 1))){
 											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
 											strcat(errorStr,"Operation between different types ");
 											myError(errorStr);
 											errorStr=NULL;
 										}
-
-										/*Check for var, array, function and integer*/
-
+	
+										/*Return the type of the expression*/
+										if (isNum == 1)
+											$$ = "int";
+										else if (isFloat == 1)
+											$$ = "float";
+										else if (f !=NULL){
+											switch(f->symbol->type){
+												case 1: { $$ = "int"; break;}
+												case 2: { $$ = "float"; break;}
+												case 3: { $$ = "void"; break;}
+											}
+										}
+										/*If the computation is correct put type in global var*/
+										/*if (f != NULL)
+											expType = f->symbol->type;
+										else {
+											if (g != NULL)
+												expType = g->symbol->type;
+											else
+												expType = -1;
+										}*/
 										/*astNode* exp = newExprNode(ADD_EXP,yylineno);
 										exp->children[0]->type=$1;
 										exp->children[1]->type=$3;
@@ -442,11 +545,9 @@ additive_expression: additive_expression addop term			{
   | term								{
 										$$ = (char*) malloc (strlen($1)*sizeof(char)); strcpy($$, $1);
 									}
-  | term doubleAddSub							{/*
-										$$ = (char*) malloc (strlen($1)*sizeof(char));
-										strcpy($$, $1);
-										strcat($$, $2);
-									*/}
+  | term doubleAddSub							{
+										printf("TERM: %s DOUBLEADD: %s\n",$1,$2);
+									}
 ;
 addop: '+'								{$$ = (char*) malloc (strlen("+")*sizeof(char)); strcpy($$, "+");}
   | '-'									{$$ = (char*) malloc (strlen("-")*sizeof(char)); strcpy($$, "-");}
@@ -481,16 +582,16 @@ term: term mulop factor							{
 											type = temp->symbol->type;
 										}*/
 
-										printf("ADDITIVE:%s ADDOP:%s TERM:%s\n",$1,$2,$3);
-										printf("isNum=%d, isFloat=%d\n",isNum, isFloat);
+										/*printf("MULT:%s TERM:%s FACTOR:%s\n",$1,$2,$3);
+										printf("isNum=%d, isFloat=%d\n",isNum, isFloat);*/
 
 										char* temp = (char*)malloc(strlen($1));
 										strcpy(temp,$1);
 
 										f=NULL;
 										searchStack(s, $1, &f, 0); 
-										if (f == NULL && strstr(temp,"[") != NULL){
-											searchStack(s, strtok(temp,"["), &f, 1);  printf("S: %p\n" ,f);}
+										if (f == NULL && strstr(temp,"[") != NULL)
+											searchStack(s, strtok(temp,"["), &f, 1);
 										if (f == NULL)
 											searchStack(s, $1, &f, 2);
 
@@ -514,20 +615,30 @@ term: term mulop factor							{
 											errorStr=NULL;
 										}
 
-										printf("F: %p, type: %d, isNum=%d\n",f ,f->symbol->type, isNum);
+										//printf("F: %p, type: %d, isNum=%d\n",f ,f->symbol->type, isNum);
 										/*Check for var, array, function and integer*/
-										if ((f!=NULL && (f->symbol->type == 1) && (isNum != 1)) || (g!=NULL && (g->symbol->type == 1) && (isNum != 1))){
+										else if ((f!=NULL && (f->symbol->type == 1) && (isNum != 1)) || (g!=NULL && (g->symbol->type == 1) && (isNum != 1))){
 											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
 											strcat(errorStr,"Operation between different types ");
 											myError(errorStr);
 											errorStr=NULL;
 										}
-										if ((f!=NULL && (f->symbol->type == 2) && (isFloat != 1)) || (g!=NULL && (g->symbol->type == 2) && (isFloat != 1))){
+										else if ((f!=NULL && (f->symbol->type == 2) && (isFloat != 1)) || (g!=NULL && (g->symbol->type == 2) && (isFloat != 1))){
 											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
 											strcat(errorStr,"Operation between different types ");
 											myError(errorStr);
 											errorStr=NULL;
+										
 										}
+										/*If the computation is correct put type in global var*/
+										/*if (f != NULL)
+											termType = f->symbol->type;
+										else {
+											if (g != NULL)
+												termType = g->symbol->type;
+											else
+												termType = -1;
+										}*/
 									}
   | factor								{
 										$$=$1;	
@@ -577,11 +688,10 @@ factor: '('expression')'						{
 										strcpy($$,s);
 									}
   | FLOAT_NUM								{
-										isFloat = 1; printf("HERE\n");
+										isFloat = 1;
 										char *s = (char*)malloc(sizeof(char)*10);
-										sprintf(s,"%5.2f",$1);
+										sprintf(s,"%5.3f",$1);
 										$$=(char*)malloc(strlen(s)*sizeof(char)); 
-printf("S: %s\n",s);
 										strcpy($$,s);
 									}
 ;
@@ -672,6 +782,13 @@ QUEUENODE * insertInQueue(char* ret, char* two, int isFunction, int isArray){
    }*/
    QUEUENODE *p = enqueue(symbol, s->head->h);
    return p;
+}
+
+int containsNumber(char *string){
+
+	if (strstr(string,"1") != NULL || strstr(string,"2") != NULL || strstr(string,"3") != NULL || strstr(string,"4") != NULL || strstr(string,"5") != NULL || strstr(string,"6") != NULL || strstr(string,"7") != NULL || strstr(string,"8") != NULL || strstr(string,"9") != NULL )
+		return 1;
+	return 0;
 }
 
 int main(void){

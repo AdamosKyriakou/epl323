@@ -79,7 +79,7 @@
  STACK *s=NULL;
  int isCompound = 0, isNum = 0, isFloat = 0, isLeft=0; //Used to find blocks inside functions
  int isArray=0;
- int flag=1;
+ int flag=1, expType = -1, termType = -1;
  int argsList[10], argsCounter = 0;
  QUEUENODE *f = NULL, *g=NULL;
  QUEUENODE **t;
@@ -87,10 +87,11 @@
  void myError (char *errorStr);
  void pushQueue();
  void pushQueue1();
+ int containsNumber(char *string);
  QUEUENODE * insertInQueue(char* ret, char* two, int isFunction, int isArray);
 
 /* Line 371 of yacc.c  */
-#line 94 "parse_934448_952056.tab.c"
+#line 95 "parse_934448_952056.tab.c"
 
 # ifndef YY_NULL
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -154,7 +155,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 387 of yacc.c  */
-#line 37 "parse_934448_952056.y"
+#line 38 "parse_934448_952056.y"
 
 	int a_number;
 	char* str;
@@ -162,7 +163,7 @@ typedef union YYSTYPE
 
 
 /* Line 387 of yacc.c  */
-#line 166 "parse_934448_952056.tab.c"
+#line 167 "parse_934448_952056.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -190,7 +191,7 @@ int yyparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 194 "parse_934448_952056.tab.c"
+#line 195 "parse_934448_952056.tab.c"
 
 #ifdef short
 # undef short
@@ -524,17 +525,17 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    53,    53,    55,    56,    58,    59,    61,    74,    88,
-      89,    90,    92,    96,   100,   105,   105,   127,   128,   129,
-     132,   189,   203,   205,   206,   207,   208,   209,   211,   216,
-     223,   224,   225,   227,   228,   230,   231,   233,   234,   236,
-     237,   237,   243,   243,   244,   244,   245,   247,   248,   249,
-     251,   254,   254,   257,   258,   260,   260,   263,   264,   264,
-     265,   266,   267,   268,   270,   271,   272,   274,   290,   306,
-     307,   309,   329,   361,   370,   379,   380,   381,   382,   383,
-     384,   386,   442,   445,   451,   452,   454,   455,   460,   461,
-     467,   532,   536,   537,   539,   543,   571,   572,   579,   588,
-     620,   622,   623,   625,   626
+       0,    54,    54,    56,    57,    59,    60,    62,    75,    89,
+      90,    91,    93,    97,   101,   106,   106,   128,   129,   130,
+     133,   190,   204,   206,   207,   208,   209,   210,   212,   217,
+     224,   225,   226,   228,   229,   231,   232,   234,   235,   237,
+     238,   238,   244,   244,   245,   245,   246,   248,   249,   250,
+     252,   255,   255,   258,   259,   261,   261,   264,   265,   265,
+     266,   267,   268,   269,   271,   272,   273,   275,   335,   392,
+     393,   395,   415,   447,   450,   454,   455,   456,   457,   458,
+     459,   461,   545,   548,   552,   553,   555,   556,   561,   562,
+     568,   643,   647,   648,   650,   654,   682,   683,   690,   698,
+     730,   732,   733,   735,   736
 };
 #endif
 
@@ -1571,37 +1572,37 @@ yyreduce:
     {
         case 2:
 /* Line 1792 of yacc.c  */
-#line 53 "parse_934448_952056.y"
+#line 54 "parse_934448_952056.y"
     {printf("Pop Final\n");pop(s); isCompound=0;}
     break;
 
   case 3:
 /* Line 1792 of yacc.c  */
-#line 55 "parse_934448_952056.y"
+#line 56 "parse_934448_952056.y"
     {/*printQueue(s->head->h);*/}
     break;
 
   case 4:
 /* Line 1792 of yacc.c  */
-#line 56 "parse_934448_952056.y"
+#line 57 "parse_934448_952056.y"
     {}
     break;
 
   case 5:
 /* Line 1792 of yacc.c  */
-#line 58 "parse_934448_952056.y"
+#line 59 "parse_934448_952056.y"
     {}
     break;
 
   case 6:
 /* Line 1792 of yacc.c  */
-#line 59 "parse_934448_952056.y"
+#line 60 "parse_934448_952056.y"
     {printf("Pop in Function \n");pop(s); isCompound=0;}
     break;
 
   case 7:
 /* Line 1792 of yacc.c  */
-#line 61 "parse_934448_952056.y"
+#line 62 "parse_934448_952056.y"
     {
 										if (qLook(s->head->h,(yyvsp[(2) - (3)].str),0) == NULL)
 											insertInQueue((yyval.str), (yyvsp[(2) - (3)].str), 0, 0);
@@ -1619,7 +1620,7 @@ yyreduce:
 
   case 8:
 /* Line 1792 of yacc.c  */
-#line 74 "parse_934448_952056.y"
+#line 75 "parse_934448_952056.y"
     { 
 										if (qLook(s->head->h,(yyvsp[(2) - (6)].str),1) == NULL)
 											insertInQueue((yyval.str), (yyvsp[(2) - (6)].str), 0, (yyvsp[(4) - (6)].a_number));
@@ -1638,25 +1639,25 @@ yyreduce:
 
   case 9:
 /* Line 1792 of yacc.c  */
-#line 88 "parse_934448_952056.y"
+#line 89 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 10:
 /* Line 1792 of yacc.c  */
-#line 89 "parse_934448_952056.y"
+#line 90 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 11:
 /* Line 1792 of yacc.c  */
-#line 90 "parse_934448_952056.y"
+#line 91 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 12:
 /* Line 1792 of yacc.c  */
-#line 92 "parse_934448_952056.y"
+#line 93 "parse_934448_952056.y"
     {
 										(yyval.str) = (char*) malloc (strlen("int")*sizeof(char));
 										strcpy((yyval.str), "int");
@@ -1665,7 +1666,7 @@ yyreduce:
 
   case 13:
 /* Line 1792 of yacc.c  */
-#line 96 "parse_934448_952056.y"
+#line 97 "parse_934448_952056.y"
     {
 										(yyval.str) = (char*) malloc (strlen("void")*sizeof(char));
 										strcpy((yyval.str), "void");
@@ -1674,7 +1675,7 @@ yyreduce:
 
   case 14:
 /* Line 1792 of yacc.c  */
-#line 100 "parse_934448_952056.y"
+#line 101 "parse_934448_952056.y"
     {
 										(yyval.str) = (char*) malloc (strlen("float")*sizeof(char));
 										strcpy((yyval.str), "float");
@@ -1683,7 +1684,7 @@ yyreduce:
 
   case 15:
 /* Line 1792 of yacc.c  */
-#line 105 "parse_934448_952056.y"
+#line 106 "parse_934448_952056.y"
     {
 					funName = (char*)malloc(strlen((yyvsp[(2) - (3)].str)));
 					strcpy(funName, (yyvsp[(2) - (3)].str));
@@ -1707,7 +1708,7 @@ yyreduce:
 
   case 16:
 /* Line 1792 of yacc.c  */
-#line 123 "parse_934448_952056.y"
+#line 124 "parse_934448_952056.y"
     {
 										
 								    }
@@ -1715,25 +1716,25 @@ yyreduce:
 
   case 17:
 /* Line 1792 of yacc.c  */
-#line 127 "parse_934448_952056.y"
+#line 128 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 18:
 /* Line 1792 of yacc.c  */
-#line 128 "parse_934448_952056.y"
+#line 129 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 19:
 /* Line 1792 of yacc.c  */
-#line 129 "parse_934448_952056.y"
+#line 130 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 20:
 /* Line 1792 of yacc.c  */
-#line 132 "parse_934448_952056.y"
+#line 133 "parse_934448_952056.y"
     {
 										(yyval.str)= (char*) malloc ((strlen((yyvsp[(1) - (1)].str)))*sizeof(char)); strcpy((yyval.str),(yyvsp[(1) - (1)].str)); printf("Params:%s\n",(yyval.str));
 										char *temp = (char*) malloc (strlen((yyvsp[(1) - (1)].str))*sizeof(char)); strcpy(temp,(yyvsp[(1) - (1)].str));
@@ -1795,7 +1796,7 @@ yyreduce:
 
   case 21:
 /* Line 1792 of yacc.c  */
-#line 189 "parse_934448_952056.y"
+#line 190 "parse_934448_952056.y"
     {
 										if (flag==0 && (f->symbol->paramTypes[0])==0){
 											errorStr = (char*)malloc(strlen("Function ")*sizeof(char));
@@ -1814,131 +1815,131 @@ yyreduce:
 
   case 22:
 /* Line 1792 of yacc.c  */
-#line 203 "parse_934448_952056.y"
+#line 204 "parse_934448_952056.y"
     {yyerror("No parameters given:");}
     break;
 
   case 23:
 /* Line 1792 of yacc.c  */
-#line 205 "parse_934448_952056.y"
+#line 206 "parse_934448_952056.y"
     {(yyval.str)= (char*) malloc ((strlen((yyvsp[(3) - (3)].str))+2+strlen((yyvsp[(1) - (3)].str)))*sizeof(char)); strcpy((yyval.str),(yyvsp[(1) - (3)].str));strcat((yyval.str),",");  strcat((yyval.str),(yyvsp[(3) - (3)].str)); }
     break;
 
   case 24:
 /* Line 1792 of yacc.c  */
-#line 206 "parse_934448_952056.y"
+#line 207 "parse_934448_952056.y"
     {(yyval.str)= (char*) malloc (strlen((yyvsp[(1) - (1)].str))*sizeof(char)); strcpy((yyval.str),(yyvsp[(1) - (1)].str));}
     break;
 
   case 25:
 /* Line 1792 of yacc.c  */
-#line 207 "parse_934448_952056.y"
+#line 208 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 26:
 /* Line 1792 of yacc.c  */
-#line 208 "parse_934448_952056.y"
+#line 209 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 27:
 /* Line 1792 of yacc.c  */
-#line 209 "parse_934448_952056.y"
+#line 210 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 28:
 /* Line 1792 of yacc.c  */
-#line 211 "parse_934448_952056.y"
+#line 212 "parse_934448_952056.y"
     {
 										strcat((yyval.str)," ");
 										strcat((yyval.str),(yyvsp[(2) - (2)].str));
-										insertInQueue((yyvsp[(1) - (2)].str), (yyvsp[(2) - (2)].str), 0, 0); // Enqueue parameter
+										insertInQueue(strtok((yyvsp[(1) - (2)].str)," "), (yyvsp[(2) - (2)].str), 0, 0); // Enqueue parameter
 									}
     break;
 
   case 29:
 /* Line 1792 of yacc.c  */
-#line 216 "parse_934448_952056.y"
+#line 217 "parse_934448_952056.y"
     {
 										strcat((yyval.str)," ");
 										strcat((yyval.str),(yyvsp[(2) - (4)].str));
 										strcat((yyval.str),"[]");
 										//$$= (char*) malloc ((strlen($1)+strlen($2)+1)*sizeof(char)); strcpy($$,$1);strcat($$," ");strcat($$,$2);
-										insertInQueue((yyvsp[(1) - (4)].str), (yyvsp[(2) - (4)].str), 0, 1); // Enqueue array parameter
+										insertInQueue(strtok((yyvsp[(1) - (4)].str)," "), (yyvsp[(2) - (4)].str), 0, 1); // Enqueue array parameter
 									}
     break;
 
   case 30:
 /* Line 1792 of yacc.c  */
-#line 223 "parse_934448_952056.y"
+#line 224 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 31:
 /* Line 1792 of yacc.c  */
-#line 224 "parse_934448_952056.y"
+#line 225 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 32:
 /* Line 1792 of yacc.c  */
-#line 225 "parse_934448_952056.y"
+#line 226 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 33:
 /* Line 1792 of yacc.c  */
-#line 227 "parse_934448_952056.y"
+#line 228 "parse_934448_952056.y"
     {}
     break;
 
   case 34:
 /* Line 1792 of yacc.c  */
-#line 228 "parse_934448_952056.y"
+#line 229 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 35:
 /* Line 1792 of yacc.c  */
-#line 230 "parse_934448_952056.y"
+#line 231 "parse_934448_952056.y"
     {/*empty*/}
     break;
 
   case 36:
 /* Line 1792 of yacc.c  */
-#line 231 "parse_934448_952056.y"
+#line 232 "parse_934448_952056.y"
     {}
     break;
 
   case 37:
 /* Line 1792 of yacc.c  */
-#line 233 "parse_934448_952056.y"
+#line 234 "parse_934448_952056.y"
     {/*empty*/}
     break;
 
   case 38:
 /* Line 1792 of yacc.c  */
-#line 234 "parse_934448_952056.y"
+#line 235 "parse_934448_952056.y"
     {}
     break;
 
   case 39:
 /* Line 1792 of yacc.c  */
-#line 236 "parse_934448_952056.y"
-    {/*$$= (char*) malloc (strlen($1)*sizeof(char)); strcpy($$,$1);*/}
+#line 237 "parse_934448_952056.y"
+    {}
     break;
 
   case 40:
 /* Line 1792 of yacc.c  */
-#line 237 "parse_934448_952056.y"
+#line 238 "parse_934448_952056.y"
     { if (isCompound != 1){ pushQueue(); printf("Push in Compound\n"); isCompound=2;  }}
     break;
 
   case 41:
 /* Line 1792 of yacc.c  */
-#line 237 "parse_934448_952056.y"
+#line 238 "parse_934448_952056.y"
     {
 														if (isCompound == 2){
 															pop(s); printf("Pop in Compound\n"); 
@@ -1949,55 +1950,55 @@ yyreduce:
 
   case 42:
 /* Line 1792 of yacc.c  */
-#line 243 "parse_934448_952056.y"
+#line 244 "parse_934448_952056.y"
     {pushQueue(); printf("Push in If/Else\n"); isCompound=1;}
     break;
 
   case 43:
 /* Line 1792 of yacc.c  */
-#line 243 "parse_934448_952056.y"
+#line 244 "parse_934448_952056.y"
     {pop(s); printf("Pop in If/Else\n");isCompound=0;}
     break;
 
   case 44:
 /* Line 1792 of yacc.c  */
-#line 244 "parse_934448_952056.y"
-    {pushQueue(); printf("Push in Iteration\n"); isCompound=1;}
+#line 245 "parse_934448_952056.y"
+    {pushQueue(); printf("Push in Iteration\n"); isCompound=1; printf("GOT IN FOR\n");}
     break;
 
   case 45:
 /* Line 1792 of yacc.c  */
-#line 244 "parse_934448_952056.y"
+#line 245 "parse_934448_952056.y"
     {pop(s); printf("Pop in Iteration\n");isCompound=0;}
     break;
 
   case 46:
 /* Line 1792 of yacc.c  */
-#line 245 "parse_934448_952056.y"
+#line 246 "parse_934448_952056.y"
     {}
     break;
 
   case 47:
 /* Line 1792 of yacc.c  */
-#line 247 "parse_934448_952056.y"
+#line 248 "parse_934448_952056.y"
     {/*$$= (char*) malloc (strlen($1)*sizeof(char)); strcpy($$,$1); strcat($$,";");*/}
     break;
 
   case 48:
 /* Line 1792 of yacc.c  */
-#line 248 "parse_934448_952056.y"
+#line 249 "parse_934448_952056.y"
     {/*$$= (char*) malloc (strlen(";")*sizeof(char)); strcpy($$,";");*/}
     break;
 
   case 49:
 /* Line 1792 of yacc.c  */
-#line 249 "parse_934448_952056.y"
+#line 250 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 50:
 /* Line 1792 of yacc.c  */
-#line 251 "parse_934448_952056.y"
+#line 252 "parse_934448_952056.y"
     {
 												//pushQueue(); printf("Push in If\n");
 									}
@@ -2005,13 +2006,13 @@ yyreduce:
 
   case 51:
 /* Line 1792 of yacc.c  */
-#line 254 "parse_934448_952056.y"
+#line 255 "parse_934448_952056.y"
     {pop(s); printf("Pop in If\n"); pushQueue(); printf("Push in Else\n");}
     break;
 
   case 52:
 /* Line 1792 of yacc.c  */
-#line 254 "parse_934448_952056.y"
+#line 255 "parse_934448_952056.y"
     {
 										//pushQueue(); printf("Push in If2\n");
 									}
@@ -2019,25 +2020,25 @@ yyreduce:
 
   case 53:
 /* Line 1792 of yacc.c  */
-#line 257 "parse_934448_952056.y"
+#line 258 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 54:
 /* Line 1792 of yacc.c  */
-#line 258 "parse_934448_952056.y"
+#line 259 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 55:
 /* Line 1792 of yacc.c  */
-#line 260 "parse_934448_952056.y"
+#line 261 "parse_934448_952056.y"
     {isCompound=1;}
     break;
 
   case 56:
 /* Line 1792 of yacc.c  */
-#line 260 "parse_934448_952056.y"
+#line 261 "parse_934448_952056.y"
     {	
 										//pushQueue(); printf("Push in Iteration\n");
 									}
@@ -2045,121 +2046,206 @@ yyreduce:
 
   case 57:
 /* Line 1792 of yacc.c  */
-#line 263 "parse_934448_952056.y"
+#line 264 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 58:
 /* Line 1792 of yacc.c  */
-#line 264 "parse_934448_952056.y"
+#line 265 "parse_934448_952056.y"
     {isCompound=1;}
     break;
 
   case 59:
 /* Line 1792 of yacc.c  */
-#line 264 "parse_934448_952056.y"
+#line 265 "parse_934448_952056.y"
     {}
     break;
 
   case 60:
 /* Line 1792 of yacc.c  */
-#line 265 "parse_934448_952056.y"
+#line 266 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 61:
 /* Line 1792 of yacc.c  */
-#line 266 "parse_934448_952056.y"
+#line 267 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 62:
 /* Line 1792 of yacc.c  */
-#line 267 "parse_934448_952056.y"
+#line 268 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 63:
 /* Line 1792 of yacc.c  */
-#line 268 "parse_934448_952056.y"
+#line 269 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 64:
 /* Line 1792 of yacc.c  */
-#line 270 "parse_934448_952056.y"
+#line 271 "parse_934448_952056.y"
     {}
     break;
 
   case 65:
 /* Line 1792 of yacc.c  */
-#line 271 "parse_934448_952056.y"
+#line 272 "parse_934448_952056.y"
     {}
     break;
 
   case 66:
 /* Line 1792 of yacc.c  */
-#line 272 "parse_934448_952056.y"
+#line 273 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 67:
 /* Line 1792 of yacc.c  */
-#line 274 "parse_934448_952056.y"
+#line 275 "parse_934448_952056.y"
     { 
-									  /*$$= (char*) malloc (strlen($1)*sizeof(char)); 
-									  strcpy($$,$1);
-									  strcat($$,"=");
-									  strcat($$,$3);*/
-									  QUEUENODE *temp = NULL;
-									  if (isArray==0){
-									  	searchStack(s,(yyvsp[(1) - (3)].str), &temp,0);
-									  }
-									  else{
-										char *str = (char*)malloc(strlen((yyvsp[(1) - (3)].str))*sizeof(char));
-										strcpy(str,(yyvsp[(1) - (3)].str));
-									  	searchStack(s,strtok(str,"["), &temp,1);
-										isArray=0;
-									  }
+										/*$$= (char*) malloc (strlen($1)*sizeof(char)); 
+										strcpy($$,$1);
+										strcat($$,"=");
+										strcat($$,$3);*/
+										QUEUENODE *temp = NULL;
+										char *string = (char*)malloc(strlen((yyvsp[(3) - (3)].str)));
+										strcpy(string,(yyvsp[(3) - (3)].str));
+										if (isArray==0){
+									  		searchStack(s,(yyvsp[(1) - (3)].str), &temp,0);
+										}
+										else{
+											char *str = (char*)malloc(strlen((yyvsp[(1) - (3)].str))*sizeof(char));
+											strcpy(str,(yyvsp[(1) - (3)].str));
+									  		searchStack(s,strtok(str,"["), &temp,1);
+											isArray=0;
+										}
+										//printf("$$: %s N: %d F: %d TEMP: %p\n",$3,isNum,isFloat,temp);
+										/*If expression is a number check if the type matches var type*/
+										if (isNum == 1 && temp->symbol->type != 1){
+											errorStr = (char*)malloc(strlen("assignment of int to float ")*sizeof(char));
+											strcat(errorStr,"Assignment of int to float ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										else if (isFloat == 1 && temp->symbol->type != 2){
+											errorStr = (char*)malloc(strlen("assignment of float to int ")*sizeof(char));
+											strcat(errorStr,"Assignment of float to int ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										/*If expression does contain number then check if the type matches var*/
+										else if (strstr(string," ") == NULL && strstr(string,"-") == NULL && strstr(string,"+") == NULL && strstr(string,"*") == NULL && strstr(string,"/") == NULL){
+											//printf("HERERERERERERERERERERERERERERE: %s\n",string);					
+											if (containsNumber(string) == 1 || strstr(string, ".") != NULL){ // only one number	
+												if (strlen(string) == 1){
+													if (temp != NULL && temp->symbol->type != 1){
+														//printf("NUM123: %s temp: %d\n",string,temp->symbol->type);
+														errorStr = (char*)malloc(strlen("assignment of float to int ")*sizeof(char));
+														strcat(errorStr,"Assignment of float to int ");
+														myError(errorStr);
+														errorStr=NULL;												
+													}
+												}
+												else{
+													if (temp != NULL && temp->symbol->type != 2){
+														//printf("NUM: %s temp: %d\n",string,temp->symbol->type);
+														errorStr = (char*)malloc(strlen("assignment of int to float ")*sizeof(char));
+														strcat(errorStr,"Assignment of int to float ");
+														myError(errorStr);
+														errorStr=NULL;
+													}
+												}
+													
+											}
+											else{  // only one var
+											}
+										}								
+										expType = -1; termType = -1;
 									}
     break;
 
   case 68:
 /* Line 1792 of yacc.c  */
-#line 290 "parse_934448_952056.y"
+#line 335 "parse_934448_952056.y"
     {
-									  /*$$= (char*) malloc (strlen($1)*sizeof(char)); 
-									  strcpy($$,$1);
-									  strcat($$,"=-");
-									  strcat($$,$4);*/
-									  QUEUENODE *temp = NULL;
-									  searchStack(s,(yyvsp[(1) - (4)].str), &temp,0);
-									  /*if (temp==NULL){
-										errorStr = (char*)malloc(strlen("variable ")*sizeof(char));
-										strcat(errorStr,"Variable ");
-										strcat(errorStr,$1);
-										strcat(errorStr," is not declared");
-										myError(errorStr);
-										errorStr=NULL;
-									  }*/
+										QUEUENODE *temp = NULL;
+										char *string = (char*)malloc(strlen((yyvsp[(4) - (4)].str)));
+										strcpy(string,(yyvsp[(4) - (4)].str));
+										if (isArray==0){
+									  		searchStack(s,(yyvsp[(1) - (4)].str), &temp,0);
+										}
+										else{
+											char *str = (char*)malloc(strlen((yyvsp[(1) - (4)].str))*sizeof(char));
+											strcpy(str,(yyvsp[(1) - (4)].str));
+									  		searchStack(s,strtok(str,"["), &temp,1);
+											isArray=0;
+										}
+										//printf("$$: %s N: %d F: %d TEMP: %p\n",$3,isNum,isFloat,temp);
+										/*If expression is a number check if the type matches var type*/
+										if (isNum == 1 && temp->symbol->type != 1){
+											errorStr = (char*)malloc(strlen("assignment of int to float ")*sizeof(char));
+											strcat(errorStr,"Assignment of int to float ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										else if (isFloat == 1 && temp->symbol->type != 2){
+											errorStr = (char*)malloc(strlen("assignment of float to int ")*sizeof(char));
+											strcat(errorStr,"Assignment of float to int ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										/*If expression does contain number then check if the type matches var*/
+										else if (strstr(string," ") == NULL && strstr(string,"-") == NULL && strstr(string,"+") == NULL && strstr(string,"*") == NULL && strstr(string,"/") == NULL){
+											//printf("HERERERERERERERERERERERERERERE: %s\n",string);					
+											if (containsNumber(string) == 1 || strstr(string, ".") != NULL){ // only one number	
+												if (strlen(string) == 1){
+													if (temp != NULL && temp->symbol->type != 1){
+														//printf("NUM123: %s temp: %d\n",string,temp->symbol->type);
+														errorStr = (char*)malloc(strlen("assignment of float to int ")*sizeof(char));
+														strcat(errorStr,"Assignment of float to int ");
+														myError(errorStr);
+														errorStr=NULL;												
+													}
+												}
+												else{
+													if (temp != NULL && temp->symbol->type != 2){
+														//printf("NUM: %s temp: %d\n",string,temp->symbol->type);
+														errorStr = (char*)malloc(strlen("assignment of int to float ")*sizeof(char));
+														strcat(errorStr,"Assignment of int to float ");
+														myError(errorStr);
+														errorStr=NULL;
+													}
+												}
+													
+											}
+											else{  // only one var
+											}
+										}								
+										expType = -1; termType = -1;
+
 									}
     break;
 
   case 69:
 /* Line 1792 of yacc.c  */
-#line 306 "parse_934448_952056.y"
+#line 392 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 70:
 /* Line 1792 of yacc.c  */
-#line 307 "parse_934448_952056.y"
-    {isNum = 0; isFloat=0;}
+#line 393 "parse_934448_952056.y"
+    {isNum = 0; isFloat=0; /*printf("SIMPLE: %s\n",$$);*/}
     break;
 
   case 71:
 /* Line 1792 of yacc.c  */
-#line 309 "parse_934448_952056.y"
+#line 395 "parse_934448_952056.y"
     {
 										(yyval.str) = (char*) malloc (strlen((yyvsp[(1) - (1)].str))*sizeof(char));
 										strcpy((yyval.str), (yyvsp[(1) - (1)].str));
@@ -2184,7 +2270,7 @@ yyreduce:
 
   case 72:
 /* Line 1792 of yacc.c  */
-#line 329 "parse_934448_952056.y"
+#line 415 "parse_934448_952056.y"
     { 
 										
 										(yyval.str) = (char*) malloc (strlen((yyvsp[(1) - (4)].str))*sizeof(char));
@@ -2220,73 +2306,63 @@ yyreduce:
 
   case 73:
 /* Line 1792 of yacc.c  */
-#line 361 "parse_934448_952056.y"
+#line 447 "parse_934448_952056.y"
     {
-										astNodePtr exp = newExprNode(ADD_EXP,yylineno);
-										exp->children[0]->type=(yyvsp[(1) - (3)].str); //malloc child
-										exp->children[1]->type=(yyvsp[(3) - (3)].str);
-										//print_node($$);
-										printf("COMPARE: %d",strcmp((yyvsp[(1) - (3)].str),(yyvsp[(3) - (3)].str)));
-										printf("\n");
-										//($1->value)=($$->value);	
+										
 									}
     break;
 
   case 74:
 /* Line 1792 of yacc.c  */
-#line 370 "parse_934448_952056.y"
+#line 450 "parse_934448_952056.y"
     {
-										astNodePtr exp = newExprNode(ADD_EXP,yylineno);
-										exp->children[0]->type=(yyvsp[(1) - (1)].str);
-										//print_node($$);
-										//printf("COMPARE: %d",strcmp($1,$3));
-										printf("\n");
-										//($1->value)=($$->value);
+									
 									}
     break;
 
   case 75:
 /* Line 1792 of yacc.c  */
-#line 379 "parse_934448_952056.y"
+#line 454 "parse_934448_952056.y"
     {/*$$ = (char*) malloc (strlen(">=")*sizeof(char)); strcpy($$, ">=");*/}
     break;
 
   case 76:
 /* Line 1792 of yacc.c  */
-#line 380 "parse_934448_952056.y"
+#line 455 "parse_934448_952056.y"
     {/*$$ = (char*) malloc (strlen("<=")*sizeof(char)); strcpy($$, "<=");*/}
     break;
 
   case 77:
 /* Line 1792 of yacc.c  */
-#line 381 "parse_934448_952056.y"
+#line 456 "parse_934448_952056.y"
     {/*$$ = (char*) malloc (strlen("==")*sizeof(char)); strcpy($$, "==");*/}
     break;
 
   case 78:
 /* Line 1792 of yacc.c  */
-#line 382 "parse_934448_952056.y"
+#line 457 "parse_934448_952056.y"
     {/*$$ = (char*) malloc (strlen("!=")*sizeof(char)); strcpy($$, "!=");*/}
     break;
 
   case 79:
 /* Line 1792 of yacc.c  */
-#line 383 "parse_934448_952056.y"
+#line 458 "parse_934448_952056.y"
     {/*$$ = (char*) malloc (strlen("<")*sizeof(char)); strcpy($$, "<");*/}
     break;
 
   case 80:
 /* Line 1792 of yacc.c  */
-#line 384 "parse_934448_952056.y"
+#line 459 "parse_934448_952056.y"
     {/*$$ = (char*) malloc (strlen(">")*sizeof(char)); strcpy($$, ">");*/}
     break;
 
   case 81:
 /* Line 1792 of yacc.c  */
-#line 386 "parse_934448_952056.y"
+#line 461 "parse_934448_952056.y"
     {
-										printf("ADDITIVE:%s ADDOP:%s TERM:%s\n",(yyvsp[(1) - (3)].str),(yyvsp[(2) - (3)].str),(yyvsp[(3) - (3)].str));
+										/*printf("ADDITIVE:%s ADDOP:%s TERM:%s\n",$1,$2,$3);
 										printf("isNum=%d, isFloat=%d\n",isNum, isFloat);
+										printf("termType=%d, expType=%d\n",termType, expType);*/
 
 										char* temp = (char*)malloc(strlen((yyvsp[(1) - (3)].str)));
 										strcpy(temp,(yyvsp[(1) - (3)].str));
@@ -2294,6 +2370,170 @@ yyreduce:
 										f=NULL;
 										searchStack(s, (yyvsp[(1) - (3)].str), &f, 0);
 										if (f == NULL && strstr((yyvsp[(1) - (3)].str),"[") != NULL)
+											searchStack(s, strtok(temp,"["), &f, 1);
+										if (f == NULL)
+											searchStack(s, (yyvsp[(1) - (3)].str), &f, 2);
+
+										temp = (char*)malloc(strlen((yyvsp[(3) - (3)].str)));
+										strcpy(temp,(yyvsp[(3) - (3)].str));
+
+										g=NULL;
+										searchStack(s, (yyvsp[(3) - (3)].str), &g, 0);
+										if (g == NULL && strstr((yyvsp[(3) - (3)].str),"[") != NULL)
+											searchStack(s, strtok(temp,"["), &g, 1);
+										if (g == NULL)
+											searchStack(s, (yyvsp[(3) - (3)].str), &g, 2);
+/*
+									if (f!=NULL)	
+										printf("F:%p, G:%p, isNum:%d, isFloat:%d Type:%d\n",f,g,isNum,isFloat,f->symbol->type);*/
+
+										/*Check for type for var, array, function*/
+										int type = -1;
+										if (isNum == 1 && isFloat == 1){
+											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
+											strcat(errorStr,"Operation between different types ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										else if (f!=NULL && g!= NULL && f->symbol->type != g->symbol->type){
+											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
+											strcat(errorStr,"Operation between different types ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+
+										/*Check for var, array, function and integer*/
+										else if ((f!=NULL && (f->symbol->type == 1) && (isNum != 1)) || (g!=NULL && (g->symbol->type == 1) && (isNum != 1))){
+											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
+											strcat(errorStr,"Operation between different types ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+										else if ((f!=NULL && (f->symbol->type == 2) && (isFloat != 1)) || (g!=NULL && (g->symbol->type == 2) && (isFloat != 1))){
+											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
+											strcat(errorStr,"Operation between different types ");
+											myError(errorStr);
+											errorStr=NULL;
+										}
+	
+										/*Return the type of the expression*/
+										if (isNum == 1)
+											(yyval.str) = "int";
+										else if (isFloat == 1)
+											(yyval.str) = "float";
+										else if (f !=NULL){
+											switch(f->symbol->type){
+												case 1: { (yyval.str) = "int"; break;}
+												case 2: { (yyval.str) = "float"; break;}
+												case 3: { (yyval.str) = "void"; break;}
+											}
+										}
+										/*If the computation is correct put type in global var*/
+										/*if (f != NULL)
+											expType = f->symbol->type;
+										else {
+											if (g != NULL)
+												expType = g->symbol->type;
+											else
+												expType = -1;
+										}*/
+										/*astNode* exp = newExprNode(ADD_EXP,yylineno);
+										exp->children[0]->type=$1;
+										exp->children[1]->type=$3;
+										printf("COMPARE: %d",strcmp($1,$3));
+										printf("\n");*/
+									}
+    break;
+
+  case 82:
+/* Line 1792 of yacc.c  */
+#line 545 "parse_934448_952056.y"
+    {
+										(yyval.str) = (char*) malloc (strlen((yyvsp[(1) - (1)].str))*sizeof(char)); strcpy((yyval.str), (yyvsp[(1) - (1)].str));
+									}
+    break;
+
+  case 83:
+/* Line 1792 of yacc.c  */
+#line 548 "parse_934448_952056.y"
+    {
+										printf("TERM: %s DOUBLEADD: %s\n",(yyvsp[(1) - (2)].str),(yyvsp[(2) - (2)].str));
+									}
+    break;
+
+  case 84:
+/* Line 1792 of yacc.c  */
+#line 552 "parse_934448_952056.y"
+    {(yyval.str) = (char*) malloc (strlen("+")*sizeof(char)); strcpy((yyval.str), "+");}
+    break;
+
+  case 85:
+/* Line 1792 of yacc.c  */
+#line 553 "parse_934448_952056.y"
+    {(yyval.str) = (char*) malloc (strlen("-")*sizeof(char)); strcpy((yyval.str), "-");}
+    break;
+
+  case 86:
+/* Line 1792 of yacc.c  */
+#line 555 "parse_934448_952056.y"
+    {/*$$ = (char*) malloc (strlen("++")*sizeof(char)); strcpy($$, "++");*/}
+    break;
+
+  case 87:
+/* Line 1792 of yacc.c  */
+#line 556 "parse_934448_952056.y"
+    {/*
+										$$ = (char*) malloc (strlen("+=")*sizeof(char));
+										strcpy($$, "+=");
+										strcat($$, $2);
+									*/}
+    break;
+
+  case 88:
+/* Line 1792 of yacc.c  */
+#line 561 "parse_934448_952056.y"
+    {/*$$ = (char*) malloc (strlen("--")*sizeof(char)); strcpy($$, "--");*/}
+    break;
+
+  case 89:
+/* Line 1792 of yacc.c  */
+#line 562 "parse_934448_952056.y"
+    {/*
+										$$ = (char*) malloc (strlen("-=")*sizeof(char));
+										strcpy($$, "-=");
+										strcat($$, $2);
+									*/}
+    break;
+
+  case 90:
+/* Line 1792 of yacc.c  */
+#line 568 "parse_934448_952056.y"
+    {
+										/*printf("TERM:%s MULOP:%s FACTOR:%s\n",$1,$2,$3);
+										QUEUENODE *temp = NULL;
+										int type=-1;
+										if (strstr($1,"(")!=NULL){
+									  		searchStack(s,$1, &temp, 2);
+										}
+										else if (strstr($1,"[")!=NULL){
+									  		searchStack(s,$1, &temp, 1);
+										}
+										else{
+									  		searchStack(s,$1, &temp, 0);
+										}	
+										if (temp!=NULL){
+											type = temp->symbol->type;
+										}*/
+
+										/*printf("MULT:%s TERM:%s FACTOR:%s\n",$1,$2,$3);
+										printf("isNum=%d, isFloat=%d\n",isNum, isFloat);*/
+
+										char* temp = (char*)malloc(strlen((yyvsp[(1) - (3)].str)));
+										strcpy(temp,(yyvsp[(1) - (3)].str));
+
+										f=NULL;
+										searchStack(s, (yyvsp[(1) - (3)].str), &f, 0); 
+										if (f == NULL && strstr(temp,"[") != NULL)
 											searchStack(s, strtok(temp,"["), &f, 1);
 										if (f == NULL)
 											searchStack(s, (yyvsp[(1) - (3)].str), &f, 2);
@@ -2318,165 +2558,36 @@ yyreduce:
 											errorStr=NULL;
 										}
 
+										//printf("F: %p, type: %d, isNum=%d\n",f ,f->symbol->type, isNum);
 										/*Check for var, array, function and integer*/
-										if ((f!=NULL && (f->symbol->type == 1) && (isNum != 1)) || (g!=NULL && (g->symbol->type == 1) && (isNum != 1))){
+										else if ((f!=NULL && (f->symbol->type == 1) && (isNum != 1)) || (g!=NULL && (g->symbol->type == 1) && (isNum != 1))){
 											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
 											strcat(errorStr,"Operation between different types ");
 											myError(errorStr);
 											errorStr=NULL;
 										}
-										if ((f!=NULL && (f->symbol->type == 2) && (isFloat != 1)) || (g!=NULL && (g->symbol->type == 2) && (isFloat != 1))){
+										else if ((f!=NULL && (f->symbol->type == 2) && (isFloat != 1)) || (g!=NULL && (g->symbol->type == 2) && (isFloat != 1))){
 											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
 											strcat(errorStr,"Operation between different types ");
 											myError(errorStr);
 											errorStr=NULL;
+										
 										}
-
-										/*Check for var, array, function and integer*/
-
-										/*astNode* exp = newExprNode(ADD_EXP,yylineno);
-										exp->children[0]->type=$1;
-										exp->children[1]->type=$3;
-										printf("COMPARE: %d",strcmp($1,$3));
-										printf("\n");*/
-									}
-    break;
-
-  case 82:
-/* Line 1792 of yacc.c  */
-#line 442 "parse_934448_952056.y"
-    {
-										(yyval.str) = (char*) malloc (strlen((yyvsp[(1) - (1)].str))*sizeof(char)); strcpy((yyval.str), (yyvsp[(1) - (1)].str));
-									}
-    break;
-
-  case 83:
-/* Line 1792 of yacc.c  */
-#line 445 "parse_934448_952056.y"
-    {/*
-										$$ = (char*) malloc (strlen($1)*sizeof(char));
-										strcpy($$, $1);
-										strcat($$, $2);
-									*/}
-    break;
-
-  case 84:
-/* Line 1792 of yacc.c  */
-#line 451 "parse_934448_952056.y"
-    {(yyval.str) = (char*) malloc (strlen("+")*sizeof(char)); strcpy((yyval.str), "+");}
-    break;
-
-  case 85:
-/* Line 1792 of yacc.c  */
-#line 452 "parse_934448_952056.y"
-    {(yyval.str) = (char*) malloc (strlen("-")*sizeof(char)); strcpy((yyval.str), "-");}
-    break;
-
-  case 86:
-/* Line 1792 of yacc.c  */
-#line 454 "parse_934448_952056.y"
-    {/*$$ = (char*) malloc (strlen("++")*sizeof(char)); strcpy($$, "++");*/}
-    break;
-
-  case 87:
-/* Line 1792 of yacc.c  */
-#line 455 "parse_934448_952056.y"
-    {/*
-										$$ = (char*) malloc (strlen("+=")*sizeof(char));
-										strcpy($$, "+=");
-										strcat($$, $2);
-									*/}
-    break;
-
-  case 88:
-/* Line 1792 of yacc.c  */
-#line 460 "parse_934448_952056.y"
-    {/*$$ = (char*) malloc (strlen("--")*sizeof(char)); strcpy($$, "--");*/}
-    break;
-
-  case 89:
-/* Line 1792 of yacc.c  */
-#line 461 "parse_934448_952056.y"
-    {/*
-										$$ = (char*) malloc (strlen("-=")*sizeof(char));
-										strcpy($$, "-=");
-										strcat($$, $2);
-									*/}
-    break;
-
-  case 90:
-/* Line 1792 of yacc.c  */
-#line 467 "parse_934448_952056.y"
-    {
-										/*printf("TERM:%s MULOP:%s FACTOR:%s\n",$1,$2,$3);
-										QUEUENODE *temp = NULL;
-										int type=-1;
-										if (strstr($1,"(")!=NULL){
-									  		searchStack(s,$1, &temp, 2);
-										}
-										else if (strstr($1,"[")!=NULL){
-									  		searchStack(s,$1, &temp, 1);
-										}
-										else{
-									  		searchStack(s,$1, &temp, 0);
-										}	
-										if (temp!=NULL){
-											type = temp->symbol->type;
+										/*If the computation is correct put type in global var*/
+										/*if (f != NULL)
+											termType = f->symbol->type;
+										else {
+											if (g != NULL)
+												termType = g->symbol->type;
+											else
+												termType = -1;
 										}*/
-
-										printf("ADDITIVE:%s ADDOP:%s TERM:%s\n",(yyvsp[(1) - (3)].str),(yyvsp[(2) - (3)].str),(yyvsp[(3) - (3)].str));
-										printf("isNum=%d, isFloat=%d\n",isNum, isFloat);
-
-										char* temp = (char*)malloc(strlen((yyvsp[(1) - (3)].str)));
-										strcpy(temp,(yyvsp[(1) - (3)].str));
-
-										f=NULL;
-										searchStack(s, (yyvsp[(1) - (3)].str), &f, 0); 
-										if (f == NULL && strstr(temp,"[") != NULL){
-											searchStack(s, strtok(temp,"["), &f, 1);  printf("S: %p\n" ,f);}
-										if (f == NULL)
-											searchStack(s, (yyvsp[(1) - (3)].str), &f, 2);
-
-										temp = (char*)malloc(strlen((yyvsp[(3) - (3)].str)));
-										strcpy(temp,(yyvsp[(3) - (3)].str));
-
-										g=NULL;
-										searchStack(s, (yyvsp[(3) - (3)].str), &g, 0);
-										if (g == NULL && strstr((yyvsp[(3) - (3)].str),"[") != NULL)
-											searchStack(s, strtok(temp,"["), &g, 1);
-										if (g == NULL)
-											searchStack(s, (yyvsp[(3) - (3)].str), &g, 2);
-
-										//printf("isNUM:%d\n",f->symbol->type,isNum);
-
-										/*Check for type for var, array, function*/
-										if (f!=NULL && g!= NULL && f->symbol->type != g->symbol->type){
-											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
-											strcat(errorStr,"Operation between different types ");
-											myError(errorStr);
-											errorStr=NULL;
-										}
-
-										printf("F: %p, type: %d, isNum=%d\n",f ,f->symbol->type, isNum);
-										/*Check for var, array, function and integer*/
-										if ((f!=NULL && (f->symbol->type == 1) && (isNum != 1)) || (g!=NULL && (g->symbol->type == 1) && (isNum != 1))){
-											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
-											strcat(errorStr,"Operation between different types ");
-											myError(errorStr);
-											errorStr=NULL;
-										}
-										if ((f!=NULL && (f->symbol->type == 2) && (isFloat != 1)) || (g!=NULL && (g->symbol->type == 2) && (isFloat != 1))){
-											errorStr = (char*)malloc(strlen("Operation between different types ")*sizeof(char));
-											strcat(errorStr,"Operation between different types ");
-											myError(errorStr);
-											errorStr=NULL;
-										}
 									}
     break;
 
   case 91:
 /* Line 1792 of yacc.c  */
-#line 532 "parse_934448_952056.y"
+#line 643 "parse_934448_952056.y"
     {
 										(yyval.str)=(yyvsp[(1) - (1)].str);	
 									}
@@ -2484,19 +2595,19 @@ yyreduce:
 
   case 92:
 /* Line 1792 of yacc.c  */
-#line 536 "parse_934448_952056.y"
+#line 647 "parse_934448_952056.y"
     {(yyval.str) = (char*) malloc (strlen("*")*sizeof(char)); strcpy((yyval.str), "*");}
     break;
 
   case 93:
 /* Line 1792 of yacc.c  */
-#line 537 "parse_934448_952056.y"
+#line 648 "parse_934448_952056.y"
     {(yyval.str) = (char*) malloc (strlen("/")*sizeof(char)); strcpy((yyval.str), "/");}
     break;
 
   case 94:
 /* Line 1792 of yacc.c  */
-#line 539 "parse_934448_952056.y"
+#line 650 "parse_934448_952056.y"
     {
 									  /*$$=(char*)malloc(strlen($2)*sizeof(char));
 									  strcpy($$,$2);*/
@@ -2505,7 +2616,7 @@ yyreduce:
 
   case 95:
 /* Line 1792 of yacc.c  */
-#line 543 "parse_934448_952056.y"
+#line 654 "parse_934448_952056.y"
     { 
 										isNum = 0;
 										(yyval.str)=(yyvsp[(1) - (1)].str);
@@ -2538,13 +2649,13 @@ yyreduce:
 
   case 96:
 /* Line 1792 of yacc.c  */
-#line 571 "parse_934448_952056.y"
+#line 682 "parse_934448_952056.y"
     { (yyval.str)=(yyvsp[(1) - (1)].str); }
     break;
 
   case 97:
 /* Line 1792 of yacc.c  */
-#line 572 "parse_934448_952056.y"
+#line 683 "parse_934448_952056.y"
     {
 										isNum = 1;// printf("IS NUM\n");
 										char *s = (char*)malloc(sizeof(char)*5);
@@ -2556,20 +2667,19 @@ yyreduce:
 
   case 98:
 /* Line 1792 of yacc.c  */
-#line 579 "parse_934448_952056.y"
+#line 690 "parse_934448_952056.y"
     {
-										isFloat = 1; printf("HERE\n");
+										isFloat = 1;
 										char *s = (char*)malloc(sizeof(char)*10);
-										sprintf(s,"%5.2f",(yyvsp[(1) - (1)].f_number));
+										sprintf(s,"%5.3f",(yyvsp[(1) - (1)].f_number));
 										(yyval.str)=(char*)malloc(strlen(s)*sizeof(char)); 
-printf("S: %s\n",s);
 										strcpy((yyval.str),s);
 									}
     break;
 
   case 99:
 /* Line 1792 of yacc.c  */
-#line 588 "parse_934448_952056.y"
+#line 698 "parse_934448_952056.y"
     { //TODO: find the parameters in the stack and add their values(void**), *****function or array as argument in function****
 										f=NULL;
 										searchStack(s,(yyvsp[(1) - (4)].str),&f,2);
@@ -2606,37 +2716,37 @@ printf("S: %s\n",s);
 
   case 100:
 /* Line 1792 of yacc.c  */
-#line 620 "parse_934448_952056.y"
+#line 730 "parse_934448_952056.y"
     {yyerrok;}
     break;
 
   case 101:
 /* Line 1792 of yacc.c  */
-#line 622 "parse_934448_952056.y"
+#line 732 "parse_934448_952056.y"
     {(yyval.str)= (char*) malloc (strlen((yyvsp[(1) - (1)].str))*sizeof(char)); strcpy((yyval.str),(yyvsp[(1) - (1)].str));}
     break;
 
   case 102:
 /* Line 1792 of yacc.c  */
-#line 623 "parse_934448_952056.y"
+#line 733 "parse_934448_952056.y"
     {(yyval.str)= (char*) malloc (strlen("")*sizeof(char)); strcpy((yyval.str),"");}
     break;
 
   case 103:
 /* Line 1792 of yacc.c  */
-#line 625 "parse_934448_952056.y"
+#line 735 "parse_934448_952056.y"
     {(yyval.str)= (char*) malloc ((strlen((yyvsp[(1) - (3)].str))+strlen((yyvsp[(3) - (3)].str))+2)*sizeof(char)); strcpy((yyval.str),(yyvsp[(1) - (3)].str)); strcat((yyval.str),","); strcat((yyval.str),(yyvsp[(3) - (3)].str)); }
     break;
 
   case 104:
 /* Line 1792 of yacc.c  */
-#line 626 "parse_934448_952056.y"
+#line 736 "parse_934448_952056.y"
     {(yyval.str)= (char*) malloc (strlen((yyvsp[(1) - (1)].str))*sizeof(char)); strcpy((yyval.str),(yyvsp[(1) - (1)].str));}
     break;
 
 
 /* Line 1792 of yacc.c  */
-#line 2640 "parse_934448_952056.tab.c"
+#line 2750 "parse_934448_952056.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2868,7 +2978,7 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 628 "parse_934448_952056.y"
+#line 738 "parse_934448_952056.y"
 
 void pushQueue(){
    QUEUE *q=NULL; 
@@ -2916,6 +3026,13 @@ QUEUENODE * insertInQueue(char* ret, char* two, int isFunction, int isArray){
    }*/
    QUEUENODE *p = enqueue(symbol, s->head->h);
    return p;
+}
+
+int containsNumber(char *string){
+
+	if (strstr(string,"1") != NULL || strstr(string,"2") != NULL || strstr(string,"3") != NULL || strstr(string,"4") != NULL || strstr(string,"5") != NULL || strstr(string,"6") != NULL || strstr(string,"7") != NULL || strstr(string,"8") != NULL || strstr(string,"9") != NULL )
+		return 1;
+	return 0;
 }
 
 int main(void){
